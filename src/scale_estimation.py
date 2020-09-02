@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import utils.draw as draw
 import utils.format as form
+import scale_predictor as SP
 lk_params = dict(winSize  = (21, 21), 
                 #maxLevel = 3,
                 criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 30, 0.01))
@@ -85,7 +86,6 @@ def dense_flow(frame_1,frame_2):
 
 def main():
     image_name_file = open(sys.argv[1])
-    motion_scale_gt = np.loadtxt(sys.argv[2])
     image_name_file.readline()
     image_names = image_name_file.read().split('\n')
     begin_id = 0
@@ -94,6 +94,11 @@ def main():
     detector = FeatureDetector()
     image_names = image_names[:-1]
     data_file = open('data.txt','a')
+
+    depth_means_grid = np.loadtxt(sys.argv[2])
+    depth_stds_grid = np.loadtxt(sys.argv[3])
+    scale_predictor = SP.ScalePredictor(depth_means_grid,depth_stds_grid,5)
+    scales = []
     for image_name in image_names:
         if image_id< begin_id:
             image_id+=1
@@ -109,13 +114,14 @@ def main():
             print(feature_cur.shape)
             feature_flow = np.abs(feature_cur -feature_last)
             depth_f,mask = motion_estimarion(feature_cur,feature_last,716,607,189)
-            data = np.stack((feature_cur[mask,0],feature_cur[mask,1],feature_flow[mask,0],feature_flow[mask,1],depth_f*motion_scale_gt[image_id-1])).transpose()
-            data_s = form.mat2str(data)
-            data_file.write(data_s)
-            data_file.flush()
+            feature_uv = feature_cur[mask,:]
+            scale  =  scale_predictor.scale_predict(feature_uv,depth_f)
+            print('scale*******',scale)
+            scales.append(scale)
             
         image_last = image.copy()
         image_id+=1
+    np.savetxt('scales.txt',scales)
 
 if __name__ == '__main__':
     main()
