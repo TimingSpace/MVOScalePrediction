@@ -22,7 +22,7 @@ def model_construction(image_list,scale_gt,vo,mc):
         print(image_name_cur)
         assert frame is not None
         R,t,feature3d,feature2d = vo.process(frame)
-        mc.process(R,t,feature2d,feature3d,scale_gt[frame_id])
+        mc.process(R,t,feature2d,feature3d,scale_gt[frame_id-1])
         if vis_flag:
             frame_copy = frame.copy()
             vu.draw_feature(frame_copy,feature2d)
