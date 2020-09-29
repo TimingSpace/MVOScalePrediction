@@ -1,0 +1,9 @@
+src/*.swp
+src/utils/__pycache
+dataset/*
+.DS_Store
+src/__pycache__/
+src/utils/__pycache__/
+*.swp
+*/*.swp
+result

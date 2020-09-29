@@ -150,6 +150,7 @@ def dense_flow(frame_1,frame_2):
     hsv[...,2] = cv2.normalize(mag,None,0,255,cv2.NORM_MINMAX)
     bgr = cv2.cvtColor(hsv,cv2.COLOR_HSV2BGR)
     cv2.imshow('frame2',bgr)
+
 def main():
     image_name_file = open(sys.argv[1])
     image_name_file.readline()
