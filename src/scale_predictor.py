@@ -1,11 +1,11 @@
 import numpy as np
 
 class ScalePredictor:
-    def __init__(self,depth_mean_grid,depth_variance_grid,grid_size,threshold=20):
-        self.depth_mean_grid     = depth_mean_grid
-        self.depth_std_grid = depth_variance_grid 
-        self.grid_size           = grid_size
-        self.variance_threshold  = threshold
+    def __init__(self,environment_model,scale_parameters):
+        self.depth_mean_grid     = environment_model.model[:,:,1]
+        self.depth_std_grid      = environment_model.model[:,:,0]
+        self.grid_size           = environment_model.grid_size
+        self.variance_threshold  = scale_parameters['threshold']
 
 
     def get_depth(self,u,v):
@@ -28,11 +28,12 @@ class ScalePredictor:
             u,v = feature_uv[feature_id]
             depth_abs,depth_std = self.get_depth(u,v)
             scale_t = depth_abs/feature_depth[feature_id]
-            if depth_std<self.variance_threshold:
+            if depth_std<self.variance_threshold and depth_std>0:
                 scales.append(scale_t)
                 stds.append(depth_std)
         scales = np.array(scales)
         stds   = np.array(stds)
         scale =  self.scale_fusion(scales,stds)
+        print(scale)
         return scale
 

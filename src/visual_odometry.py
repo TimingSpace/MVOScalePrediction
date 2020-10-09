@@ -94,6 +94,8 @@ class VisualOdometry:
         self.image_last = image.copy()
         return R,t,feature3d,feature_cur[mask,:]
 
+    def reset(self):
+        self.image_last = None
 
 
 
