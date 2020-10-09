@@ -52,4 +52,6 @@ class ModelConstructor:
 
         plt.show()
     def write(self,name):
-        np.savetxt(name,model)
+        np.save(name,self.model)
+    def read(self,name):
+        self.model = np.load(name+'.npy')

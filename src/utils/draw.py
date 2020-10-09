@@ -1,4 +1,5 @@
 import cv2
+import matplotlib.pyplot as plt
 
 def draw_line(img,feature_s,feature_t,color=(255,255,0)):
     
@@ -15,4 +16,6 @@ def draw_feature(img,feature,color=(255,255,0)):
     for i in range(feature.shape[0]):
         cv2.circle(img,(int(feature[i,0]),int(feature[i,1])),3,color,-1)
 
-
+def draw_path(path):
+    plt.plot(path[:,3],path[:,11],color='b',label='vo')
+    plt.show()

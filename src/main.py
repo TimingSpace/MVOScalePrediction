@@ -5,6 +5,7 @@ from  visual_odometry  import VisualOdometry
 from model_constructor import ModelConstructor
 from scale_predictor   import ScalePredictor
 import visualization_utils as vu
+import utils.draw as draw
 
 def model_construction(image_list,scale_gt,vo,mc):
     model = None
@@ -48,7 +49,7 @@ def vo_with_scale(image_list,vo,sp):
     return path.reshape(-1,16)[:,0:12]
 
 def main():
-    flag_train = True
+    flag_train = False
     image_list_file = open(sys.argv[1])
     image_list_file.readline() # skip the  first line
     image_list = image_list_file.read().split('\n')
@@ -58,15 +59,20 @@ def main():
     model_params = {'image_shape':[1241,376],'grid_size':5}
     mc = ModelConstructor(model_params)
     if flag_train:
-        environment_model = model_construction(image_list[0:10],scale_gt,vo,mc)
+        environment_model = model_construction(image_list,scale_gt,vo,mc)
+        mc.write('environment_model')
     else:
-        environment_model = model_load()
+        mc.read('environment_model')
+        environment_model = mc.model
+
     #mc.visualization()
     scale_params={'threshold':20}
     sc = ScalePredictor(mc,scale_params)
     vo.reset()
     path = vo_with_scale(image_list[0:100],vo,sc)
     np.savetxt('path.txt',path)
+    draw.draw_path(path)
+
 
     
 
