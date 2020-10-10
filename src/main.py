@@ -15,7 +15,9 @@ def model_construction(image_list,scale_gt,vo,mc):
         frame    = cv2.imread(image_name_cur)
         print(image_name_cur)
         assert frame is not None
-        R,t,feature3d,feature2d = vo.process(frame)
+        flag,R,t,feature3d,feature2d = vo.process(frame)
+        if flag == 'stop':
+            continue
         mc.process(R,t,feature2d,feature3d,scale_gt[frame_id-1])
         if vis_flag:
             frame_copy = frame.copy()
@@ -35,11 +37,15 @@ def vo_with_scale(image_list,vo,sp):
         image_name_cur = image_list[frame_id]
         frame    = cv2.imread(image_name_cur)
         print(image_name_cur)
-        assert frame is not None
-        R,t,feature3d,feature2d = vo.process(frame)
-        if R is None:
+        assert frame is not None,'got invalid image'
+        flag,R,t,feature3d,feature2d = vo.process(frame)
+        if flag == 'init':
+            continue
+        elif flag == 'stop':
+            path.append(path[-1])
             continue
         scale = sp.scale_predict(feature2d,feature3d[:,2])
+        assert scale >= 0, 'got invalid scale'
         motion = np.eye(4)
         motion[0:3,0:3] = R
         motion[0:3,3]   = (t*scale).reshape(-1)
@@ -69,7 +75,7 @@ def main():
     scale_params={'threshold':20}
     sc = ScalePredictor(mc,scale_params)
     vo.reset()
-    path = vo_with_scale(image_list[0:100],vo,sc)
+    path = vo_with_scale(image_list,vo,sc)
     np.savetxt('path.txt',path)
     draw.draw_path(path)
 

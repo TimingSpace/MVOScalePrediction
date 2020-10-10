@@ -41,6 +41,11 @@ class FeatureDetector:
                     new_feature.append(features[feature_id[k]])
         
         return np.array(new_feature)
+def if_stop(feature_cur,feature_last):
+    flow = feature_cur - feature_last
+    flow_abs = np.abs(flow)
+    flow_ave = np.mean(flow_abs)
+    return flow_ave<0.5
 
 class VisualOdometry:
     def __init__(self,params):
@@ -83,8 +88,12 @@ class VisualOdometry:
         features = self.feature_detector.detect(image)
         if self.image_last is None:
             self.image_last = image.copy()
-            return None, None, None,None
+            return 'init',None, None, None,None
         feature_cur,feature_last = self.feature_tracking(image,self.image_last,features)
+        stop_flag = if_stop(feature_cur,feature_last)
+        print(stop_flag)
+        if stop_flag:
+            return 'stop',None, None, None,None
         R,t,feature3d,mask = self.motion_estimarion(feature_cur,feature_last)
         if False:
             image_show = image.copy()
@@ -92,7 +101,7 @@ class VisualOdometry:
             cv2.imshow('im',image_show)
             cv2.waitKey()
         self.image_last = image.copy()
-        return R,t,feature3d,feature_cur[mask,:]
+        return 'normal',R,t,feature3d,feature_cur[mask,:]
 
     def reset(self):
         self.image_last = None
