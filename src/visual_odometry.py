@@ -73,7 +73,7 @@ class VisualOdometry:
         kp2 = kp2[st == 1]
         return kp1, kp2
 
-    def motion_estimarion(self,feature_cur,feature_last):
+    def motion_estimation(self,feature_cur,feature_last):
         E, mask = cv2.findEssentialMat(feature_cur, feature_last,cameraMatrix = self.camera_matrix , method=cv2.RANSAC, prob=0.999, threshold=1.0)
         _, R, t, mask,points_3d = cv2.recoverPose(E, feature_cur,\
              feature_last,cameraMatrix=self.camera_matrix,distanceThresh=100)
@@ -94,7 +94,7 @@ class VisualOdometry:
         print(stop_flag)
         if stop_flag:
             return 'stop',None, None, None,None
-        R,t,feature3d,mask = self.motion_estimarion(feature_cur,feature_last)
+        R,t,feature3d,mask = self.motion_estimation(feature_cur,feature_last)
         if False:
             image_show = image.copy()
             vu.draw_line(image_show,feature_cur[mask,:],feature_last[mask,:])
